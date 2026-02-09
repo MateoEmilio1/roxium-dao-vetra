@@ -1,85 +1,240 @@
-import {
-  DocumentStateViewer,
-  DocumentToolbar,
-} from "@powerhousedao/design-system/connect";
+import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   useSelectedProposalDocument,
   actions,
 } from "roxium-dao-vetra/document-models/proposal";
+import {
+  setProposalDetails,
+  updateProposalStatus,
+} from "../../document-models/proposal/gen/creators.js";
+import { useDaoDocumentsInSelectedDrive } from "../../document-models/dao/hooks.js";
+import { useState } from "react";
 
 export default function Editor() {
   const [document, dispatch] = useSelectedProposalDocument();
+  const state = document.state.global;
+  const daoDocuments = useDaoDocumentsInSelectedDrive();
 
-  const handleSetName = (name: string) => {
-    // 'actions' contains all available actions for this document type
-    dispatch(actions.setName(name));
+  const [title, setTitle] = useState(state.title ?? "");
+  const [description, setDescription] = useState(state.description ?? "");
+  const [daoId, setDaoId] = useState(state.daoId ?? "");
+  const [createdBy, setCreatedBy] = useState(state.createdBy ?? "");
+
+  const handleSave = () => {
+    if (!title.trim() || !daoId.trim() || !createdBy.trim()) return;
+    dispatch(
+      setProposalDetails({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        daoId: daoId.trim(),
+        createdBy: createdBy.trim(),
+        createdAt: state.createdAt ?? new Date().toISOString(),
+      }),
+    );
   };
 
   return (
-    <div className="mx-auto max-w-4xl bg-gray-50 p-6">
+    <div
+      style={{
+        maxWidth: 800,
+        margin: "0 auto",
+        padding: 24,
+        fontFamily: "sans-serif",
+      }}
+    >
       <DocumentToolbar />
 
-      {/* "ph-default-styles" sets default styles for basic UI elements */}
-      <div className="ph-default-styles">
-        {/* Edit document name */}
-        <label className="my-6">
-          <h3>Document Name</h3>
+      <div style={{ marginTop: 16 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>
+          Proposal Editor
+        </h2>
+
+        {/* Document header name */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontWeight: 500, marginBottom: 4 }}>
+            Document Name
+          </label>
           <input
             type="text"
             defaultValue={document.header.name}
             placeholder="Enter document name..."
-            title="Edit document name and click outside to save."
-            autoFocus
-            onBlur={(e) => handleSetName(e.target.value.trim())}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.currentTarget.blur();
-              }
+            onBlur={(e) => {
+              const val = e.target.value.trim();
+              if (val) dispatch(actions.setName(val));
             }}
-            className="font-semibold"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.currentTarget.blur();
+            }}
+            style={{
+              width: "100%",
+              padding: "6px 8px",
+              border: "1px solid #ccc",
+            }}
           />
-        </label>
-        <hr />
-
-        {/* Document header info */}
-        <div className="mb-6 grid grid-cols-2 gap-x-8">
-          <label>
-            <h3 className="text-base">ID</h3>
-            <input
-              type="text"
-              value={document.header.id}
-              readOnly
-              className="font-mono"
-            />
-          </label>
-          <label>
-            <h3 className="text-base">Created</h3>
-            <input
-              type="text"
-              value={new Date(document.header.createdAtUtcIso).toLocaleString()}
-              readOnly
-            />
-          </label>
-          <label>
-            <h3 className="text-base">Type</h3>
-            <input type="text" value={document.header.documentType} readOnly />
-          </label>
-          <label>
-            <h3 className="text-base">Last Modified</h3>
-            <input
-              type="text"
-              value={new Date(
-                document.header.lastModifiedAtUtcIso,
-              ).toLocaleString()}
-              readOnly
-            />
-          </label>
         </div>
 
-        {/* Document state */}
-        <div className="mt-6">
-          <h3 className="text-base">Document State</h3>
-          <DocumentStateViewer state={document.state} />
+        <hr style={{ margin: "16px 0" }} />
+
+        {/* Link to DAO */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontWeight: 500, marginBottom: 4 }}>
+            Linked DAO <span style={{ color: "red" }}>*</span>
+          </label>
+          {daoDocuments && daoDocuments.length > 0 ? (
+            <select
+              value={daoId}
+              onChange={(e) => setDaoId(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "6px 8px",
+                border: "1px solid #ccc",
+              }}
+            >
+              <option value="">-- Select a DAO --</option>
+              {daoDocuments.map((dao) => (
+                <option key={dao.header.id} value={dao.header.id}>
+                  {dao.state.global.name || dao.header.name || dao.header.id}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={daoId}
+              onChange={(e) => setDaoId(e.target.value)}
+              placeholder="DAO document ID"
+              style={{
+                width: "100%",
+                padding: "6px 8px",
+                border: "1px solid #ccc",
+              }}
+            />
+          )}
+        </div>
+
+        {/* Title */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontWeight: 500, marginBottom: 4 }}>
+            Title <span style={{ color: "red" }}>*</span>
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Proposal title"
+            style={{
+              width: "100%",
+              padding: "6px 8px",
+              border: "1px solid #ccc",
+            }}
+          />
+        </div>
+
+        {/* Description */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontWeight: 500, marginBottom: 4 }}>
+            Description
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe this proposal..."
+            rows={3}
+            style={{
+              width: "100%",
+              padding: "6px 8px",
+              border: "1px solid #ccc",
+            }}
+          />
+        </div>
+
+        {/* Created By */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontWeight: 500, marginBottom: 4 }}>
+            Created By <span style={{ color: "red" }}>*</span>
+          </label>
+          <input
+            type="text"
+            value={createdBy}
+            onChange={(e) => setCreatedBy(e.target.value)}
+            placeholder="Your name or user ID"
+            style={{
+              width: "100%",
+              padding: "6px 8px",
+              border: "1px solid #ccc",
+            }}
+          />
+        </div>
+
+        <button
+          onClick={handleSave}
+          disabled={!title.trim() || !daoId.trim() || !createdBy.trim()}
+          style={{
+            background:
+              !title.trim() || !daoId.trim() || !createdBy.trim()
+                ? "#9ca3af"
+                : "#2563eb",
+            color: "white",
+            border: "none",
+            padding: "8px 24px",
+            cursor: "pointer",
+            borderRadius: 3,
+            marginBottom: 16,
+          }}
+        >
+          Save Details
+        </button>
+
+        <hr style={{ margin: "16px 0" }} />
+
+        {/* Status */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontWeight: 500, marginBottom: 4 }}>
+            Status: <strong>{state.status ?? "DRAFT"}</strong>
+          </label>
+          <div style={{ display: "flex", gap: 8 }}>
+            {["DRAFT", "ACTIVE", "CLOSED"].map((s) => (
+              <button
+                key={s}
+                disabled={state.status === s}
+                onClick={() =>
+                  dispatch(
+                    updateProposalStatus({
+                      status: s,
+                      closedAt:
+                        s === "CLOSED" ? new Date().toISOString() : undefined,
+                    }),
+                  )
+                }
+                style={{
+                  background: state.status === s ? "#6b7280" : "#e5e7eb",
+                  color: state.status === s ? "white" : "#333",
+                  border: "none",
+                  padding: "4px 12px",
+                  cursor: state.status === s ? "default" : "pointer",
+                  borderRadius: 3,
+                }}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <hr style={{ margin: "16px 0" }} />
+
+        {/* Metadata */}
+        <div style={{ fontSize: 12, color: "#666" }}>
+          <p>ID: {document.header.id}</p>
+          <p>Type: {document.header.documentType}</p>
+          <p>
+            Created:{" "}
+            {new Date(document.header.createdAtUtcIso).toLocaleString()}
+          </p>
+          <p>
+            Modified:{" "}
+            {new Date(document.header.lastModifiedAtUtcIso).toLocaleString()}
+          </p>
         </div>
       </div>
     </div>
