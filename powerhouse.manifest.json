@@ -20,7 +20,29 @@
             "name": "Task"
         }
     ],
-    "editors": [],
+    "editors": [
+        {
+            "id": "dao-editor",
+            "name": "DaoEditor",
+            "documentTypes": [
+                "roxium/dao"
+            ]
+        },
+        {
+            "id": "proposal-editor",
+            "name": "ProposalEditor",
+            "documentTypes": [
+                "roxium/proposal"
+            ]
+        },
+        {
+            "id": "task-editor",
+            "name": "TaskEditor",
+            "documentTypes": [
+                "roxium/task"
+            ]
+        }
+    ],
     "apps": [],
     "subgraphs": [],
     "importScripts": []
