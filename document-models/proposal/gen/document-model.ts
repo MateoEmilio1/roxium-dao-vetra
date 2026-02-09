@@ -1,0 +1,69 @@
+import type { DocumentModelGlobalState } from "document-model";
+
+export const documentModel: DocumentModelGlobalState = {
+  author: {
+    name: "Roxium Labs",
+    website: "https://roxium.io",
+  },
+  description:
+    "Represents a DAO proposal with status tracking (DRAFT/ACTIVE/CLOSED). No voting logic.",
+  extension: "rxprop",
+  id: "roxium/proposal",
+  name: "Proposal",
+  specifications: [
+    {
+      changeLog: [],
+      modules: [
+        {
+          description: "Core Proposal operations",
+          id: "proposal_core_module",
+          name: "core",
+          operations: [
+            {
+              description: "Sets or initializes the proposal details",
+              errors: [],
+              examples: [],
+              id: "prop_op_set_details",
+              name: "SET_PROPOSAL_DETAILS",
+              reducer:
+                "state.daoId = action.input.daoId;\nstate.title = action.input.title;\nstate.description = action.input.description || null;\nstate.createdBy = action.input.createdBy;\nstate.createdAt = action.input.createdAt;",
+              schema:
+                "input SetProposalDetailsInput {\n  daoId: String!\n  title: String!\n  description: String\n  createdBy: String!\n  createdAt: DateTime!\n}",
+              scope: "global",
+              template: "Sets or initializes the proposal details",
+            },
+            {
+              description:
+                "Updates the proposal status (DRAFT, ACTIVE, CLOSED)",
+              errors: [],
+              examples: [],
+              id: "prop_op_update_status",
+              name: "UPDATE_PROPOSAL_STATUS",
+              reducer:
+                "state.status = action.input.status;\nstate.closedAt = action.input.closedAt || null;",
+              schema:
+                "input UpdateProposalStatusInput {\n  status: String!\n  closedAt: DateTime\n}",
+              scope: "global",
+              template: "Updates the proposal status (DRAFT, ACTIVE, CLOSED)",
+            },
+          ],
+        },
+      ],
+      state: {
+        global: {
+          examples: [],
+          initialValue:
+            '{"daoId":"","title":"","description":"","status":"DRAFT","createdBy":"","createdAt":null,"closedAt":null}',
+          schema:
+            "type ProposalState {\n  daoId: String\n  title: String\n  description: String\n  status: String\n  createdBy: String\n  createdAt: DateTime\n  closedAt: DateTime\n}",
+        },
+        local: {
+          examples: [],
+          initialValue: "",
+          schema: "",
+        },
+      },
+      version: 1,
+    },
+  ],
+};

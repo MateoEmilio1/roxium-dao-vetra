@@ -1,0 +1,27 @@
+{
+    "name": "roxium-dao-vetra",
+    "description": "",
+    "category": "",
+    "publisher": {
+        "name": "",
+        "url": ""
+    },
+    "documentModels": [
+        {
+            "id": "roxium/dao",
+            "name": "Dao"
+        },
+        {
+            "id": "roxium/proposal",
+            "name": "Proposal"
+        },
+        {
+            "id": "roxium/task",
+            "name": "Task"
+        }
+    ],
+    "editors": [],
+    "apps": [],
+    "subgraphs": [],
+    "importScripts": []
+}

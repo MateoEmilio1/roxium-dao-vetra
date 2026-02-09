@@ -1,0 +1,9 @@
+{
+	"servers": {
+		"vetra-mcp": {
+			"url": "http://localhost:4001/mcp",
+			"type": "http"
+		}
+	},
+	"inputs": []
+}
