@@ -13,6 +13,13 @@ import {
   removeMember,
 } from "../../document-models/dao/gen/creators.js";
 
+// Note: setDaoOwner will be available after running npm run generate
+// For now, create the action manually
+const setDaoOwner = (input: { ownerUserId: string }) => ({
+  type: "SET_DAO_OWNER" as const,
+  input,
+});
+
 export default function Editor() {
   const [document, dispatch] = useSelectedDaoDocument();
   const state = document.state.global;
@@ -98,6 +105,30 @@ export default function Editor() {
             onBlur={(e) => {
               const val = e.target.value.trim();
               if (val) dispatch(setDaoDescription({ description: val }));
+            }}
+            style={{
+              width: "100%",
+              padding: "6px 8px",
+              border: "1px solid #ccc",
+            }}
+          />
+        </div>
+
+        {/* Owner User ID */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontWeight: 500, marginBottom: 4 }}>
+            Owner User ID
+          </label>
+          <input
+            type="text"
+            defaultValue={(state as any).ownerUserId ?? ""}
+            placeholder="e.g. user123"
+            onBlur={(e) => {
+              const val = e.target.value.trim();
+              if (val) dispatch(setDaoOwner({ ownerUserId: val }));
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.currentTarget.blur();
             }}
             style={{
               width: "100%",

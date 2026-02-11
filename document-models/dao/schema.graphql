@@ -29,6 +29,8 @@ type Member {
 type DaoState {
   name: String
   description: String
+  ownerUserId: String
+  createdAt: DateTime
   members: [Member!]!
 }
 
@@ -56,4 +58,8 @@ input UpdateMemberRoleInput {
 
 input RemoveMemberInput {
   id: OID!
+}
+
+input SetDaoOwnerInput {
+  ownerUserId: String!
 }

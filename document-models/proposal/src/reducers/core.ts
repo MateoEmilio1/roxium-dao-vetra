@@ -7,6 +7,8 @@ export const proposalCoreOperations: ProposalCoreOperations = {
     state.description = action.input.description || null;
     state.createdBy = action.input.createdBy;
     state.createdAt = action.input.createdAt;
+    state.budget = action.input.budget || null;
+    state.deadline = action.input.deadline || null;
   },
   updateProposalStatusOperation(state, action) {
     state.status = action.input.status;

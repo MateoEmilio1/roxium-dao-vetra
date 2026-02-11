@@ -19,6 +19,8 @@ export default function Editor() {
   const [description, setDescription] = useState(state.description ?? "");
   const [daoId, setDaoId] = useState(state.daoId ?? "");
   const [createdBy, setCreatedBy] = useState(state.createdBy ?? "");
+  const [budget, setBudget] = useState((state as any).budget?.toString() ?? "");
+  const [deadline, setDeadline] = useState((state as any).deadline ?? "");
 
   const handleSave = () => {
     if (!title.trim() || !daoId.trim() || !createdBy.trim()) return;
@@ -29,6 +31,8 @@ export default function Editor() {
         daoId: daoId.trim(),
         createdBy: createdBy.trim(),
         createdAt: state.createdAt ?? new Date().toISOString(),
+        budget: budget.trim() ? parseFloat(budget) : undefined,
+        deadline: deadline.trim() || undefined,
       }),
     );
   };
@@ -158,6 +162,41 @@ export default function Editor() {
             value={createdBy}
             onChange={(e) => setCreatedBy(e.target.value)}
             placeholder="Your name or user ID"
+            style={{
+              width: "100%",
+              padding: "6px 8px",
+              border: "1px solid #ccc",
+            }}
+          />
+        </div>
+
+        {/* Budget */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontWeight: 500, marginBottom: 4 }}>
+            Budget
+          </label>
+          <input
+            type="number"
+            value={budget}
+            onChange={(e) => setBudget(e.target.value)}
+            placeholder="e.g. 10000"
+            style={{
+              width: "100%",
+              padding: "6px 8px",
+              border: "1px solid #ccc",
+            }}
+          />
+        </div>
+
+        {/* Deadline */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontWeight: 500, marginBottom: 4 }}>
+            Deadline
+          </label>
+          <input
+            type="datetime-local"
+            value={deadline ? new Date(deadline).toISOString().slice(0, 16) : ""}
+            onChange={(e) => setDeadline(e.target.value ? new Date(e.target.value).toISOString() : "")}
             style={{
               width: "100%",
               padding: "6px 8px",
