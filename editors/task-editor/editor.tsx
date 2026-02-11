@@ -11,6 +11,19 @@ import {
 import { useProposalDocumentsInSelectedDrive } from "../../document-models/proposal/hooks.js";
 import { useDaoDocumentsInSelectedDrive } from "../../document-models/dao/hooks.js";
 import { useState } from "react";
+import { generateId } from "document-model/core";
+
+// Note: addDocument and removeDocument will be available after running npm run generate
+// For now, create the actions manually
+const addDocument = (input: { id: string; url: string; kind: string }) => ({
+  type: "ADD_DOCUMENT" as const,
+  input,
+});
+
+const removeDocument = (input: { id: string }) => ({
+  type: "REMOVE_DOCUMENT" as const,
+  input,
+});
 
 export default function Editor() {
   const [document, dispatch] = useSelectedTaskDocument();
@@ -24,6 +37,12 @@ export default function Editor() {
   const [proposalId, setProposalId] = useState(state.proposalId ?? "");
   const [createdBy, setCreatedBy] = useState(state.createdBy ?? "");
   const [assigneeInput, setAssigneeInput] = useState(state.assignee ?? "");
+  const [budget, setBudget] = useState((state as any).budget?.toString() ?? "");
+  const [deadline, setDeadline] = useState((state as any).deadline ?? "");
+
+  // Document attachment form
+  const [newDocUrl, setNewDocUrl] = useState("");
+  const [newDocKind, setNewDocKind] = useState("IMAGE");
 
   const handleSave = () => {
     if (!title.trim() || !daoId.trim() || !createdBy.trim()) return;
@@ -36,6 +55,8 @@ export default function Editor() {
         assignee: assigneeInput.trim() || undefined,
         createdBy: createdBy.trim(),
         createdAt: state.createdAt ?? new Date().toISOString(),
+        budget: budget.trim() ? parseFloat(budget) : undefined,
+        deadline: deadline.trim() || undefined,
       }),
     );
   };
@@ -212,6 +233,41 @@ export default function Editor() {
           />
         </div>
 
+        {/* Budget */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontWeight: 500, marginBottom: 4 }}>
+            Budget
+          </label>
+          <input
+            type="number"
+            value={budget}
+            onChange={(e) => setBudget(e.target.value)}
+            placeholder="e.g. 5000"
+            style={{
+              width: "100%",
+              padding: "6px 8px",
+              border: "1px solid #ccc",
+            }}
+          />
+        </div>
+
+        {/* Deadline */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontWeight: 500, marginBottom: 4 }}>
+            Deadline
+          </label>
+          <input
+            type="datetime-local"
+            value={deadline ? new Date(deadline).toISOString().slice(0, 16) : ""}
+            onChange={(e) => setDeadline(e.target.value ? new Date(e.target.value).toISOString() : "")}
+            style={{
+              width: "100%",
+              padding: "6px 8px",
+              border: "1px solid #ccc",
+            }}
+          />
+        </div>
+
         <button
           onClick={handleSave}
           disabled={!title.trim() || !daoId.trim() || !createdBy.trim()}
@@ -301,6 +357,114 @@ export default function Editor() {
               Assign
             </button>
           </div>
+        </div>
+
+        <hr style={{ margin: "16px 0" }} />
+
+        {/* Attachments */}
+        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
+          Attachments ({(state as any).documents?.length ?? 0})
+        </h3>
+
+        {(state as any).documents && (state as any).documents.length > 0 && (
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              marginBottom: 12,
+            }}
+          >
+            <thead>
+              <tr style={{ borderBottom: "2px solid #ddd", textAlign: "left" }}>
+                <th style={{ padding: "4px 8px" }}>URL</th>
+                <th style={{ padding: "4px 8px" }}>Type</th>
+                <th style={{ padding: "4px 8px" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(state as any).documents.map((doc: any) => (
+                <tr key={doc.id} style={{ borderBottom: "1px solid #eee" }}>
+                  <td style={{ padding: "4px 8px", fontSize: 12, wordBreak: "break-all" }}>
+                    <a href={doc.url} target="_blank" rel="noopener noreferrer" style={{ color: "#2563eb" }}>
+                      {doc.url}
+                    </a>
+                  </td>
+                  <td style={{ padding: "4px 8px" }}>{doc.kind}</td>
+                  <td style={{ padding: "4px 8px" }}>
+                    <button
+                      onClick={() => dispatch(removeDocument({ id: doc.id }))}
+                      style={{
+                        background: "#dc2626",
+                        color: "white",
+                        border: "none",
+                        padding: "2px 8px",
+                        cursor: "pointer",
+                        borderRadius: 3,
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {/* Add Document Form */}
+        <div style={{ display: "flex", gap: 8, alignItems: "flex-end", marginBottom: 16 }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: "block", fontSize: 12, marginBottom: 2 }}>
+              Document URL
+            </label>
+            <input
+              type="text"
+              value={newDocUrl}
+              onChange={(e) => setNewDocUrl(e.target.value)}
+              placeholder="https://example.com/document.pdf"
+              style={{
+                width: "100%",
+                padding: "4px 8px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: 12, marginBottom: 2 }}>
+              Type
+            </label>
+            <select
+              value={newDocKind}
+              onChange={(e) => setNewDocKind(e.target.value)}
+              style={{ padding: "4px 8px", border: "1px solid #ccc" }}
+            >
+              <option value="IMAGE">IMAGE</option>
+              <option value="PDF">PDF</option>
+            </select>
+          </div>
+          <button
+            onClick={() => {
+              if (!newDocUrl.trim()) return;
+              dispatch(
+                addDocument({
+                  id: generateId(),
+                  url: newDocUrl.trim(),
+                  kind: newDocKind,
+                }),
+              );
+              setNewDocUrl("");
+            }}
+            style={{
+              background: "#2563eb",
+              color: "white",
+              border: "none",
+              padding: "6px 16px",
+              cursor: "pointer",
+              borderRadius: 3,
+            }}
+          >
+            Add Document
+          </button>
         </div>
 
         <hr style={{ margin: "16px 0" }} />

@@ -27,6 +27,8 @@ type ProposalState {
   createdBy: String
   createdAt: DateTime
   closedAt: DateTime
+  budget: Amount_Money
+  deadline: DateTime
 }
 
 # core
@@ -37,6 +39,8 @@ input SetProposalDetailsInput {
   description: String
   createdBy: String!
   createdAt: DateTime!
+  budget: Amount_Money
+  deadline: DateTime
 }
 
 input UpdateProposalStatusInput {

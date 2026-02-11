@@ -19,6 +19,12 @@ scalar Amount_Crypto
 scalar Amount
 scalar Upload
 
+type TaskDocument {
+  id: OID!
+  url: URL!
+  kind: String!
+}
+
 type TaskState {
   daoId: String
   proposalId: String
@@ -29,6 +35,9 @@ type TaskState {
   createdBy: String
   createdAt: DateTime
   updatedAt: DateTime
+  budget: Amount_Money
+  deadline: DateTime
+  documents: [TaskDocument!]!
 }
 
 # core
@@ -41,6 +50,8 @@ input SetTaskDetailsInput {
   assignee: String
   createdBy: String!
   createdAt: DateTime!
+  budget: Amount_Money
+  deadline: DateTime
 }
 
 input UpdateTaskStatusInput {
@@ -51,4 +62,14 @@ input UpdateTaskStatusInput {
 input AssignTaskInput {
   assignee: String!
   updatedAt: DateTime!
+}
+
+input AddDocumentInput {
+  id: OID!
+  url: URL!
+  kind: String!
+}
+
+input RemoveDocumentInput {
+  id: OID!
 }
