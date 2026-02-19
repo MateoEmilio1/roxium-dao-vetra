@@ -11,6 +11,9 @@ export const daoCoreOperations: DaoCoreOperations = {
   setDaoDescriptionOperation(state, action) {
     state.description = action.input.description;
   },
+  setDaoOwnerOperation(state, action) {
+    state.ownerUserId = action.input.ownerUserId;
+  },
   addMemberOperation(state, action) {
     const existing = state.members.find((m) => m.id === action.input.id);
     if (existing) {
